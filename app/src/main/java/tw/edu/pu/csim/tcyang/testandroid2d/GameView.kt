@@ -3,12 +3,19 @@ package tw.edu.pu.csim.tcyang.testandroid2d
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import androidx.core.content.ContextCompat.getSystemService
+import java.lang.Exception
 
-class GameView(context: Context?, bundle: Bundle) : SurfaceView(context), SurfaceHolder.Callback {
+class GameView(context: Context?, bundle: Bundle) : SurfaceView(context),
+        SurfaceHolder.Callback, SensorEventListener {
 
     var paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val screenWidth= Resources.getSystem().displayMetrics.widthPixels  //讀取螢幕寬度
@@ -29,6 +36,9 @@ class GameView(context: Context?, bundle: Bundle) : SurfaceView(context), Surfac
 
     var boy:Boy? = null
     var virus:Virus? = null
+
+    lateinit var sm : SensorManager
+    lateinit var sr : Sensor
 
     init {
         holder.addCallback(this)
@@ -63,6 +73,10 @@ class GameView(context: Context?, bundle: Bundle) : SurfaceView(context), Surfac
 
         thread.running = true
         thread.start()  //開始Thread
+
+        sm = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sr = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sm.registerListener(this, sr, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
@@ -153,4 +167,32 @@ class GameView(context: Context?, bundle: Bundle) : SurfaceView(context), Surfac
         return true
     }
 
+    override fun onSensorChanged(event: SensorEvent) {
+        val x: Float = event.values.get(0)
+        if (x>1){  //比較明確往下
+            boy!!.Jump("DOWN",true)
+        }
+        else if (x<-1){    //比較明確往上
+            boy!!.Jump("UP",true)
+        }
+
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+
+    }
+
+    fun onPause(){
+        try{
+            sm.unregisterListener(this)
+        }
+        catch (e:Exception){}
+    }
+
+    fun onResume(){
+        try{
+            sm.registerListener(this, sr, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        catch (e:Exception){}
+    }
 }

@@ -68,6 +68,7 @@ class GameActivity : AppCompatActivity(), MediaPlayer.OnCompletionListener{
     override fun onPause() {
         super.onPause()
 
+        mygv.onPause()
         mygv.thread.running = false
 
         //記錄目前狀態
@@ -78,7 +79,6 @@ class GameActivity : AppCompatActivity(), MediaPlayer.OnCompletionListener{
         bundle!!.putInt("病毒x軸", mygv.virus_x)
         bundle!!.putInt("病毒y軸", mygv.virus_y)
         bundle!!.putInt("分數", mygv.Score)
-        //bundle!!.putInt("背景1x軸", 300)
 
         mylayout.removeView(mygv)
 
@@ -93,6 +93,7 @@ class GameActivity : AppCompatActivity(), MediaPlayer.OnCompletionListener{
 
     override fun onResume() {
         super.onResume()
+        mygv.onResume()
 
         mygv = GameView(this, bundle)
         mylayout.addView(mygv)
